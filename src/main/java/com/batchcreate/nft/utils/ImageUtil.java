@@ -12,31 +12,15 @@ import java.util.LinkedHashMap;
 @Slf4j
 public class ImageUtil {
     public static String SAVE_PATH = "D:\\NFT\\";
+    public static Integer NFT_WIDTH = 350;
+    public static Integer NFT_HIGH = 350;
 
     public static BufferedImage ImageAddWord(int width, int height) {
         return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     }
 
     /**
-     * 读取某个目录下所有文件、文件夹
-     * @param path
-     * @return LinkedHashMap<String,String>
-     */
-    public static LinkedHashMap<String,String> getFiles(String path) {
-        LinkedHashMap<String, String> files = new LinkedHashMap<String, String>();
-        File file = new File(path);
-        File[] tempList = file.listFiles();
-
-        for (int i = 0; i < tempList.length; i++) {
-            if (tempList[i].isDirectory()) {
-                files.put(tempList[i].getName(), tempList[i].getPath());
-            }
-        }
-        return files;
-    }
-    /**
-     * 根据首字符生成头像
-     *
+     * 批量生成NFT
      */
     public static void batchDrawn() {
         File[] backgrounds = new File("D:\\project\\nft\\src\\main\\resources\\background").listFiles();
@@ -44,7 +28,7 @@ public class ImageUtil {
         File[] peoples = new File("D:\\project\\nft\\src\\main\\resources\\people").listFiles();
         File[] pets = new File("D:\\project\\nft\\src\\main\\resources\\pet").listFiles();
 
-        BufferedImage buffImage = ImageAddWord(800,800);
+        BufferedImage buffImage = ImageAddWord(NFT_WIDTH,NFT_HIGH);
 
         Graphics2D g = buffImage.createGraphics();
         int i = 0;
@@ -53,10 +37,10 @@ public class ImageUtil {
                 for(File glass:glasses) {
                     for(File pet : pets) {
                         try {
-                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(back),0).getScaledInstance(800,800, Image.SCALE_SMOOTH), 0, 0, null);
-                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(people),0).getScaledInstance(800,800, Image.SCALE_SMOOTH), 0, 0, null);
-                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(glass),0).getScaledInstance(800,800, Image.SCALE_SMOOTH), 0, 0, null);
-                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(pet),0).getScaledInstance(800,800, Image.SCALE_SMOOTH), 0, 0, null);
+                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(back),0).getScaledInstance(NFT_WIDTH,NFT_HIGH, Image.SCALE_SMOOTH), 0, 0, null);
+                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(people),0).getScaledInstance(NFT_WIDTH,NFT_HIGH, Image.SCALE_SMOOTH), 0, 0, null);
+                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(glass),0).getScaledInstance(NFT_WIDTH,NFT_HIGH, Image.SCALE_SMOOTH), 0, 0, null);
+                            g.drawImage(ImageUtil.transparentImage(ImageIO.read(pet),0).getScaledInstance(NFT_WIDTH,NFT_HIGH, Image.SCALE_SMOOTH), 0, 0, null);
                             String filepath = SAVE_PATH + i + ".png";
                             ImageIO.write(buffImage, "png",new File(filepath));
                             i++;
@@ -89,7 +73,7 @@ public class ImageUtil {
         for(int i = 0; i < imgWidth; ++i)//把原图片的内容复制到新的图片，同时把背景设为透明
         {
             for (int j = 0; j < imgHeight; ++j) {
-//                //设置透明度
+                //设置透明度
                 int rgb = srcImage.getRGB(i, j);
 
                 int R = (rgb & 0xff0000) >> 16;
