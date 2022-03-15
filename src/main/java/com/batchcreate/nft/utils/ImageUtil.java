@@ -4,18 +4,22 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.CollectionUtils;
 
 import javax.imageio.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class ImageUtil {
-    public static String SAVE_PATH = "D:\\NFT\\";
+    public static String SAVE_PATH = "D:\\NFT-3-9\\pic\\";
+    public static String META_DATA_PATH = "D:\\NFT-3-9\\metadata\\";
 
     public static AsyncTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -43,10 +47,11 @@ public class ImageUtil {
 
     /**
      * 读取某个目录下所有文件、文件夹
+     *
      * @param path
-     * @return LinkedHashMap<String,String>
+     * @return LinkedHashMap<String, String>
      */
-    public static LinkedHashMap<String,String> getFiles(String path) {
+    public static LinkedHashMap<String, String> getFiles(String path) {
         LinkedHashMap<String, String> files = new LinkedHashMap<String, String>();
         File file = new File(path);
         File[] tempList = file.listFiles();
@@ -61,59 +66,130 @@ public class ImageUtil {
 
 
     public static void batchDrawn() {
+        // load different layer materials
         File[] backgrounds = new File("D:\\project\\nft\\src\\main\\resources\\background").listFiles();
-        File[] glasses = new File("D:\\project\\nft\\src\\main\\resources\\glass").listFiles();
-        File[] peoples = new File("D:\\project\\nft\\src\\main\\resources\\people").listFiles();
-        File[] maozi = new File("D:\\project\\nft\\src\\main\\resources\\maozi").listFiles();
-        File[] pet = new File("D:\\project\\nft\\src\\main\\resources\\pet").listFiles();
-        File[] shous = new File("D:\\project\\nft\\src\\main\\resources\\shou").listFiles();
+        File[] glasses = new File("D:\\project\\nft\\src\\main\\resources\\eye").listFiles();
+        File[] peoples = new File("D:\\project\\nft\\src\\main\\resources\\body").listFiles();
+        File[] heads = new File("D:\\project\\nft\\src\\main\\resources\\head").listFiles();
+        File[] cloths = new File("D:\\project\\nft\\src\\main\\resources\\cloth").listFiles();
+        File[] hands = new File("D:\\project\\nft\\src\\main\\resources\\hand").listFiles();
+        File[] mouths = new File("D:\\project\\nft\\src\\main\\resources\\mouth").listFiles();
+        File[] tips = new File("D:\\project\\nft\\src\\main\\resources\\body-tag").listFiles();
+
+        // init random,executor,anti-duplication list
         AsyncTaskExecutor executor = getAsyncExecutor();
-
-
+        Random random = new Random();
+        List<String> list = Collections.synchronizedList(new ArrayList<>());
+        PooledImageWriter imageWriter = new PooledImageWriter("png", 50);
+        // init nft token number
         AtomicInteger integer = new AtomicInteger(0);
-        for (File lian : maozi) {
-                for (File glass : glasses) {
-                    for (File dao : pet) {
-                        for (File shou : shous) {
-                            for (File people : peoples) {
-                            for (File back : backgrounds) {
-                                PooledImageWriter imageWriter = new PooledImageWriter("png", 10);
-                                executor.execute(() -> {
-                                            try {
-                                                BufferedImage buffImage = ImageAddWord(800, 800);
-                                                Graphics2D g = buffImage.createGraphics();
-                                                g.drawImage(ImageIO.read(back).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                g.drawImage(ImageIO.read(people).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                g.drawImage(ImageIO.read(dao).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                g.drawImage(ImageIO.read(lian).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                g.drawImage(ImageIO.read(glass).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                g.drawImage(ImageIO.read(shou).getScaledInstance(800, 800, Image.SCALE_SMOOTH), 0, 0, null);
-                                                String filepath = SAVE_PATH + integer.get() + ".png";
+        // i means nft quantity
+        for (int i = 0; i < 1000; i++) {
+            // concurrency create ,you can specify the layer order according to your needs
+            executor.execute(() -> {
+                        try {
+                            BufferedImage buffImage = ImageAddWord(1500, 1500);
+                            List<Map<String, String>> metaData = new ArrayList<>();
 
-                                                imageWriter.write(buffImage, new File(filepath));
-//                                                                Thread.sleep(1000);
-                                                log.info("生成图片{}张", integer.get());
-                                                integer.addAndGet(1);
+                            Graphics2D g = buffImage.createGraphics();
+                            int a = random.nextInt(backgrounds.length);
+                            int b = random.nextInt(peoples.length);
+                            int c = random.nextInt(cloths.length);
+                            int d = random.nextInt(mouths.length);
+                            int e = random.nextInt(tips.length);
+                            int f = random.nextInt(glasses.length);
+                            int gg = random.nextInt(heads.length);
+                            int ff = random.nextInt(hands.length);
 
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                );
+                            String s = a + b + c + d + e + f + gg + String.valueOf(ff);
+                            // anti-duplication
+                            if (list.contains(s)) {
+                                return;
                             }
+                            list.add(s);
+
+                            File back = backgrounds[a];
+                            g.drawImage(ImageIO.read(back).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap = new HashMap<>(2);
+                            metaMap.put("trait_type", "background");
+                            metaMap.put("value", back.getName().substring(0, back.getName().lastIndexOf(".")));
+                            metaData.add(metaMap);
+
+                            File people = peoples[b];
+                            g.drawImage(ImageIO.read(people).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap1 = new HashMap<>(2);
+                            metaMap1.put("trait_type", "body");
+                            metaMap1.put("value", people.getName().substring(0, people.getName().lastIndexOf(".")));
+                            metaData.add(metaMap1);
+
+                            File mouth = mouths[d];
+                            g.drawImage(ImageIO.read(mouth).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap3 = new HashMap<>(2);
+                            metaMap3.put("trait_type", "mouth");
+                            metaMap3.put("value", mouth.getName().substring(0, mouth.getName().lastIndexOf(".")));
+                            metaData.add(metaMap3);
+
+                            //                            specify the probability of occurrence of a layer
+                            if (random.nextInt(100) >= 10) {
+                                File bodyTip2 = tips[e];
+                                g.drawImage(ImageIO.read(bodyTip2).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                                Map<String, String> metaMap4 = new HashMap<>(2);
+                                metaMap4.put("trait_type", "body-tag");
+                                metaMap4.put("value", bodyTip2.getName().substring(0, bodyTip2.getName().lastIndexOf(".")));
+                                metaData.add(metaMap4);
+                            }
+
+                            File glass = glasses[f];
+                            g.drawImage(ImageIO.read(glass).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap5 = new HashMap<>(2);
+                            metaMap5.put("trait_type", "eye");
+                            metaMap5.put("value", glass.getName().substring(0, glass.getName().lastIndexOf(".")));
+                            metaData.add(metaMap5);
+
+                            File cloth = cloths[c];
+                            g.drawImage(ImageIO.read(cloth).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap2 = new HashMap<>(2);
+                            metaMap2.put("trait_type", "cloth");
+                            metaMap2.put("value", cloth.getName().substring(0, cloth.getName().lastIndexOf(".")));
+                            metaData.add(metaMap2);
+
+                            File head = heads[gg];
+                            g.drawImage(ImageIO.read(head).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap6 = new HashMap<>(2);
+                            metaMap6.put("trait_type", "head");
+                            metaMap6.put("value", head.getName().substring(0, head.getName().lastIndexOf(".")));
+                            metaData.add(metaMap6);
+
+                            File hand = hands[ff];
+                            g.drawImage(ImageIO.read(hand).getScaledInstance(1500, 1500, Image.SCALE_SMOOTH), 0, 0, null);
+                            Map<String, String> metaMap7 = new HashMap<>(2);
+                            metaMap7.put("trait_type", "hand");
+                            metaMap7.put("value", hand.getName().substring(0, hand.getName().lastIndexOf(".")));
+                            metaData.add(metaMap7);
+
+
+                            int i1 = integer.addAndGet(1);
+                            String filepath = SAVE_PATH + i1 + ".png";
+                            String metaPath = META_DATA_PATH + i1 + ".token.json";
+                            String metaJson = String.format("{\"name\":\"Token %s\",\"description\":\"An art token.\",\"animation_url\":\"/assets/index.html?id=%s\",\"image\":\"/assets/thumbnail/%s.png\",\"attributes\":%s}",
+                                    i1, i1, i1, JsonUtils.object2Json(metaData));
+                            // generate images and metadata
+                            imageWriter.write(buffImage, new File(filepath), metaPath, metaJson);
+                            buffImage.flush();
+                            log.info("生成图片{}张", i1);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
-                }
-            }
+            );
         }
     }
 
     /**
      * 设置源图片为背景透明，并设置透明度
+     *
      * @param srcImage 源图片
-     * @param alpha 透明度
+     * @param alpha    透明度
      * @throws IOException
      */
     public static BufferedImage transparentImage(BufferedImage srcImage, int alpha) throws IOException {
@@ -128,16 +204,15 @@ public class ImageUtil {
         }
         BufferedImage bi = new BufferedImage(imgWidth, imgHeight,
                 BufferedImage.TYPE_4BYTE_ABGR);//新建一个类型支持透明的BufferedImage
-        for(int i = 0; i < imgWidth; ++i)//把原图片的内容复制到新的图片，同时把背景设为透明
+        for (int i = 0; i < imgWidth; ++i)//把原图片的内容复制到新的图片，同时把背景设为透明
         {
-            for(int j = 0; j < imgHeight; ++j)
-            {
+            for (int j = 0; j < imgHeight; ++j) {
                 //把背景设为透明
-                if(srcImage.getRGB(i, j) == c){
+                if (srcImage.getRGB(i, j) == c) {
                     bi.setRGB(i, j, c & 0x00ffffff);
                 }
 //                //设置透明度
-                else{
+                else {
                     int rgb = srcImage.getRGB(i, j);
 
                     int R = (rgb & 0xff0000) >> 16;
@@ -155,12 +230,8 @@ public class ImageUtil {
     }
 
 
-
     @SneakyThrows
-    public static void main(String [] args) {
-//        File background = new File("K:\\nft\\src\\main\\resources\\background\\maomao.png");
-//        String filepath = SAVE_PATH + 1 + ".png";
-//        ImageIO.write(ImageIO.read(background),0), "png",new File(filepath));
+    public static void main(String[] args) {
         ImageUtil.batchDrawn();
     }
 

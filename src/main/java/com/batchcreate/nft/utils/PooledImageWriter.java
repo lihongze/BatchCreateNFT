@@ -5,6 +5,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,19 +18,22 @@ public class PooledImageWriter {
         }
     }
 
-    static ImageWriter get() {
+    synchronized ImageWriter get() {
         if (mPool.isEmpty()) {
             return null;
         }
         return mPool.remove(0);
     }
 
-    static void put(ImageWriter o) {
+    synchronized void put(ImageWriter o) {
         mPool.add(o);
     }
 
-    public static synchronized void write(BufferedImage image, File file) throws Exception {
+    public void write(BufferedImage image, File file,String jsonPath,String json) throws Exception {
         ImageWriter writer = get();
+        FileWriter writer1 = new FileWriter(new File(jsonPath));
+        writer1.write(json);
+        writer1.close();
 
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         writer.reset();
