@@ -21,6 +21,9 @@ public class ImageUtil {
     public static String SAVE_PATH = "D:\\NFT-FINISH\\version-1.0\\多数基础款-图\\pic\\";
     public static String META_DATA_PATH = "D:\\NFT-FINISH\\version-1.0\\多数基础款-图\\metadata\\";
 
+    public static final String IMAGE_SUFFIX = ".png";
+    public static final String METADATA_SUFFIX = ".token.json";
+
     public static AsyncTaskExecutor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.initialize();
@@ -190,8 +193,8 @@ public class ImageUtil {
     }
 
 
-    public static void resetSize() {
-        File[] images = new File("D:\\NFT-3-7-定稿\\pic-1\\").listFiles();
+    public static void resetSize(String absolutePath) {
+        File[] images = new File(absolutePath).listFiles();
         Arrays.stream(Objects.requireNonNull(images)).forEach(image -> {
             try {
                 BufferedImage buffImage = ImageIO.read(image);
@@ -227,16 +230,46 @@ public class ImageUtil {
     /**
      * 根据要删除得图片集 删除对应的metadata数据
      */
-    public static void deleteMetadataByImage() {
-        String deleteImageUrl = "D:\\NFT-FINISH\\version-1.0\\test\\delete\\";
-        String metadataUrl = "D:\\NFT-FINISH\\version-1.0\\test\\metaData\\";
+    public static void deleteMetadataByImage(String deleteImageUrl,String metadataUrl) {
         File[] images = new File(deleteImageUrl).listFiles();
         Arrays.stream(Objects.requireNonNull(images)).forEach(file -> {
             String number = file.getName().substring(0, file.getName().lastIndexOf("."));
-            File delFile = new File(metadataUrl + number + ".token.json");
+            File delFile = new File(metadataUrl + number + METADATA_SUFFIX);
             delFile.delete();
-            log.info("删除文件：{}",delFile.getAbsolutePath());
+            log.info("del image success：{}",delFile.getAbsolutePath());
         });
+    }
+
+    /**
+     * 增序重命名图片&metadata
+     * @param imagePath 需重命名的图片文件夹路径
+     * @param metadataPath 重命名的metadata文件夹路径
+     * @param startNum 起始数
+     */
+    public static void renameByStartNumber(String imagePath,String metadataPath,Integer startNum) {
+        File[] images = new File(imagePath).listFiles();
+        File[] metas = new File(metadataPath).listFiles();
+        if (isEmpty(images)) {
+            log.error("image path is empty");
+        }
+        if (isEmpty(metas)) {
+            log.error("metadataPath is empty");
+        }
+        if (images.length != metas.length) {
+            log.error("image amount not equal to metaData");
+        }
+
+        for (File file : Objects.requireNonNull(images)) {
+            if(file.renameTo(new File(imagePath + startNum + IMAGE_SUFFIX)) ) {
+                log.info("image rename success：{}", startNum);
+            }
+            String number = file.getName().substring(0, file.getName().lastIndexOf("."));
+            File metaData = new File(metadataPath + number + METADATA_SUFFIX);
+            if (metaData.renameTo(new File(metadataPath + number + METADATA_SUFFIX)) ) {
+                log.info("metadata rename success：{}",startNum);
+            }
+            startNum += 1;
+        }
     }
 
 
@@ -285,14 +318,21 @@ public class ImageUtil {
     }
 
 
+    public static boolean isEmpty(File[] files) {
+        return files == null || files.length == 0;
+    }
+
     @SneakyThrows
     public static void main(String[] args) {
         // 生成图片
 //        ImageUtil.batchDrawn();
         // 重置size
-//        ImageUtil.resetSize();
+//        ImageUtil.resetSize("D:\\NFT-3-7-定稿\\pic-1\\");
         // 删除文件
-        ImageUtil.deleteMetadataByImage();
+        ImageUtil.deleteMetadataByImage("D:\\NFT-FINISH\\version-1.0\\test\\delete\\",
+                "D:\\NFT-FINISH\\version-1.0\\test\\metaData\\");
+
+
     }
 
 }
