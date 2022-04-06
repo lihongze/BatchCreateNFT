@@ -6,10 +6,13 @@ The NFT assembly tool developed by java can generate NFT in batches by arranging
 * Support batch clearing the corresponding metadata according to the deleted image address
 * Support batch rearrange image id
 * Support batch reset image size
+* Randomly rearrange ids in batches according to the total number of result sets
+* Support batch deletion of images and metadata data according to the specified metadata attribute
+* Support batch modification of blind box metadata
 ## Instructions
 The NFT project generation step, of course, is to first draw each layer by the artist, and then generate different series according to different layer combinations, but due to the randomness of the system generation,
 It will cause the generated art pictures to have defective products. At this time, the artist needs to filter the generated series of combinations, and finally start all the filtered series of pictures from id=1.
 Incrementally rename to desired number, then aggregate all series as nft final product portfolio
 ## To be developed
-* Randomly rearrange ids in batches according to the total number of result sets
+* Batch reset metadata imageUrl
 * The ipfs tutorial for image uploading will be gradually updated in the future to realize the content of the smart contract on the chain
